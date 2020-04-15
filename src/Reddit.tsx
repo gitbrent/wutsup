@@ -1,4 +1,18 @@
 import React, { useState, useEffect } from 'react'
+import { makeStyles, createStyles, Theme } from '@material-ui/core/styles'
+import { Button, Icon, Select, MenuItem, FormControl, InputLabel, Grid, Paper, CardContent, Card, CardHeader, Avatar, IconButton, Typography } from '@material-ui/core'
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
+import CalendarTodayIcon from '@material-ui/icons/CalendarToday'
+import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined'
+import MoreVertIcon from '@material-ui/icons/MoreVert'
+
+import { createMuiTheme } from '@material-ui/core/styles'
+
+const theme = createMuiTheme({
+	palette: {
+		type: 'dark',
+	},
+})
 
 enum redditSub {
 	askreddit = 'askreddit',
@@ -45,7 +59,28 @@ interface subJson {
 	data: post
 }
 
+const useStyles = makeStyles((theme: Theme) =>
+	createStyles({
+		root: {
+			flexGrow: 1,
+		},
+		paper: {
+			padding: theme.spacing(2),
+			textAlign: 'center',
+			color: theme.palette.text.secondary,
+		},
+		expandOpen: {
+			transform: 'rotate(180deg)',
+		},
+		avatar: {
+			backgroundColor: '#fc0000',
+		},
+	})
+)
+
 export default function Reddit() {
+	const classes = useStyles()
+
 	const [delaySecs, setDelaySecs] = useState(30)
 	const [selRedditSub, setSelRedditSub] = useState<redditSub | string>(redditSub.politics)
 	const [selSortType, setSelSortType] = useState<sortType | string>(sortType.top)
@@ -57,6 +92,7 @@ export default function Reddit() {
 	/**
 	 * @desc Display loop
 	 */
+	/*
 	useEffect(() => {
 		setIdxToShow(idxToShow + 1)
 
@@ -70,7 +106,7 @@ export default function Reddit() {
 			clearInterval(interval)
 		}
 		return () => clearInterval(interval)
-	}, [isActive, seconds])
+	}, [isActive, seconds])*/
 
 	/**
 	 * Fetch data on init
@@ -95,7 +131,7 @@ export default function Reddit() {
 						subreddit: child.data.subreddit,
 						subreddit_subscribers: child.data.subreddit_subscribers,
 						selftext: child.data.selftext,
-						title: (child.data.title||'').replace(/\&amp\;/gi,'&'),
+						title: (child.data.title || '').replace(/\&amp\;/gi, '&'),
 						permalink: child.data.permalink,
 						link_flair_text: child.data.link_flair_text,
 						thumbnail: child.data.thumbnail,
@@ -155,37 +191,55 @@ export default function Reddit() {
 	}
 
 	return (
-		<div className='card mb-0'>
-			<div className='card-header bg-primary text-white text-center'>
-				<h3 className='mb-0'>REDDIT</h3>
-			</div>
-			<div className='card-body'>
-				<section className='mb-3' data-desc='filters'>
-					<div className='row'>
-						<div className='col'>
-							<select className='form-control' value={selRedditSub} onChange={event => setSelRedditSub(event.currentTarget.value)}>
+		<Card>
+			<CardHeader
+				avatar={
+					<Avatar aria-label='recipe' className={classes.avatar}>
+						R
+					</Avatar>
+				}
+				action={
+					<IconButton aria-label='settings'>
+						<MoreVertIcon />
+					</IconButton>
+				}
+				title='REDDIT'
+				subheader='September 10, 2021'
+			/>
+			<CardContent>
+				<Grid container spacing={2} justify='space-evenly' wrap='nowrap'>
+					<Grid item xs>
+						<FormControl variant='filled' fullWidth={true}>
+							<InputLabel id='demo-simple-select-label'>Selected Subreddit</InputLabel>
+							<Select
+								labelId='demo-simple-select-label'
+								id='demo-simple-select'
+								value={selRedditSub}
+								onChange={event => setSelRedditSub(event.target.value as string)}>
 								{Object.entries(redditSub).map(([key, val], idx) => (
-									<option key={`rsub${idx}`} value={`${key}`}>{`${val}`}</option>
+									<MenuItem key={`menu${idx}`} value={key}>
+										{val}
+									</MenuItem>
 								))}
-							</select>
-						</div>
-						<div className='col-auto'>
-							<select className='form-control' value={selSortType} onChange={event => setSelSortType(event.currentTarget.value)}>
-								{Object.entries(sortType).map(([key, val], idx) => (
-									<option key={`sort${idx}`} value={`${key}`}>{`${val}`}</option>
-								))}
-							</select>
-						</div>
-						<div className='col-auto'>
-							<select className='form-control' value={delaySecs} onChange={event => setDelaySecs(Number(event.currentTarget.value))}>
-								<option value='5'>5</option>
-								<option value='10'>10</option>
-								<option value='30'>30</option>
-								<option value='60'>60</option>
-							</select>
-						</div>
-					</div>
-				</section>
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid item xs={3}>
+						<FormControl variant='filled' fullWidth={true}>
+							<InputLabel id='demo-simple-select-filled-label'>Refresh Delay</InputLabel>
+							<Select
+								labelId='demo-simple-select-filled-label'
+								id='demo-simple-select-filled'
+								value={delaySecs}
+								onChange={event => setDelaySecs(Number(event.target.value))}>
+								<MenuItem value={5}>5 sec</MenuItem>
+								<MenuItem value={10}>10 sec</MenuItem>
+								<MenuItem value={30}>30 sec</MenuItem>
+								<MenuItem value={60}>60 sec</MenuItem>
+							</Select>
+						</FormControl>
+					</Grid>
+				</Grid>
 
 				<section className='mb-0' data-desc='picture posts'>
 					{posts
@@ -205,61 +259,38 @@ export default function Reddit() {
 						.filter((_post, idx) => idx >= idxToShow)
 						.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
 						.map((post, idx) => (
-							<div key={idx} className='row mb-4'>
+							<Grid key={idx} container spacing={2}>
 								{post.thumbnail && post.thumbnail !== 'default' && post.thumbnail !== 'self' && (
-									<div className='col-auto text-center' style={{ minWidth: '130px' }}>
-										<img src={post.thumbnail} alt='thumbnail' style={{ maxWidth: '100px', maxHeight: '60px' }} />
-									</div>
+									<Grid item xs='auto' style={{ minWidth: '130px' }}>
+										<div className='col-auto text-center' style={{ minWidth: '130px' }}>
+											<img src={post.thumbnail} alt='thumbnail' style={{ maxWidth: '100px', maxHeight: '60px' }} />
+										</div>
+									</Grid>
 								)}
-								<div className='col'>
-									<h5 className='text-white mb-0'>{post.title}</h5>
-									<code className='text-white-50'>
-										<svg
-											className='bi bi-calendar mr-1'
-											width='1em'
-											height='1em'
-											viewBox='0 0 16 16'
-											fill='currentColor'
-											xmlns='http://www.w3.org/2000/svg'>
-											<path
-												fill-rule='evenodd'
-												d='M14 0H2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z'
-												clip-rule='evenodd'
-											/>
-											<path
-												fill-rule='evenodd'
-												d='M6.5 7a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2zm-9 3a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2zm-9 3a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2z'
-												clip-rule='evenodd'
-											/>
-										</svg>
+								<Grid item xs>
+									<Typography itemType='h5' color='textPrimary'>
+										{post.title}
+									</Typography>
+									<Typography itemType='code' color='secondary'>
 										{post.dateCreated.toDateString()}
-									</code>
-								</div>
-								<div className='col-auto text-center text-primary'>
-									<h5>{post.num_comments}</h5>
-									<svg className='bi bi-chat h5' width='1em' height='1em' viewBox='0 0 16 16' fill='currentColor' xmlns='http://www.w3.org/2000/svg'>
-										<path
-											fill-rule='evenodd'
-											d='M2.678 11.894a1 1 0 01.287.801 10.97 10.97 0 01-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 01.71-.074A8.06 8.06 0 008 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 01-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 00.244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 01-2.347-.306c-.52.263-1.639.742-3.468 1.105z'
-											clip-rule='evenodd'
-										/>
-									</svg>
-								</div>
-								<div className='col-auto text-center text-warning'>
-									<h5>{post.ups}</h5>
-									<svg className='bi bi-arrow-up h5' width='1em' height='1em' viewBox='0 0 16 16' fill='currentColor' xmlns='http://www.w3.org/2000/svg'>
-										<path fill-rule='evenodd' d='M8 3.5a.5.5 0 01.5.5v9a.5.5 0 01-1 0V4a.5.5 0 01.5-.5z' clip-rule='evenodd' />
-										<path
-											fill-rule='evenodd'
-											d='M7.646 2.646a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8 3.707 5.354 6.354a.5.5 0 11-.708-.708l3-3z'
-											clip-rule='evenodd'
-										/>
-									</svg>
-								</div>
-							</div>
+									</Typography>
+								</Grid>
+								<Grid item xs='auto' color={theme.palette.warning.main}>
+									<Typography itemType='h5' color='primary'>
+										{post.num_comments}
+									</Typography>
+									<ChatBubbleOutlineOutlinedIcon color='primary' />
+								</Grid>
+								<Grid item xs='auto'>
+									<Typography itemType='h5' color='error'>
+										{post.ups}
+									</Typography>
+									<ArrowUpwardIcon color='error' />
+								</Grid>
+							</Grid>
 						))}
 				</section>
-			</div>
-		</div>
+			</CardContent>
+		</Card>
 	)
 }
