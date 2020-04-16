@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles'
-import { Button, Icon, Select, MenuItem, FormControl, InputLabel, Grid, Paper, CardContent, Card, CardHeader, Avatar, IconButton, Typography } from '@material-ui/core'
+import { Button, Icon, Select, MenuItem, FormControl, InputLabel, Grid, Paper, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box } from '@material-ui/core'
+import indigo from '@material-ui/core/colors/indigo'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
-import CalendarTodayIcon from '@material-ui/icons/CalendarToday'
+//import CalendarTodayIcon from '@material-ui/icons/CalendarToday'
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined'
 import MoreVertIcon from '@material-ui/icons/MoreVert'
 
@@ -261,31 +262,35 @@ export default function Reddit() {
 						.map((post, idx) => (
 							<Grid key={idx} container spacing={2}>
 								{post.thumbnail && post.thumbnail !== 'default' && post.thumbnail !== 'self' && (
-									<Grid item xs='auto' style={{ minWidth: '130px' }}>
-										<div className='col-auto text-center' style={{ minWidth: '130px' }}>
+									<Grid item xs='auto'>
+										<Box textAlign='center' style={{ minWidth: '130px' }}>
 											<img src={post.thumbnail} alt='thumbnail' style={{ maxWidth: '100px', maxHeight: '60px' }} />
-										</div>
+										</Box>
 									</Grid>
 								)}
 								<Grid item xs>
 									<Typography itemType='h5' color='textPrimary'>
 										{post.title}
 									</Typography>
-									<Typography itemType='code' color='secondary'>
-										{post.dateCreated.toDateString()}
-									</Typography>
-								</Grid>
-								<Grid item xs='auto' color={theme.palette.warning.main}>
-									<Typography itemType='h5' color='primary'>
-										{post.num_comments}
-									</Typography>
-									<ChatBubbleOutlineOutlinedIcon color='primary' />
+									<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
+										{post.dateCreated.toLocaleString()}
+									</Box>
 								</Grid>
 								<Grid item xs='auto'>
-									<Typography itemType='h5' color='error'>
-										{post.ups}
-									</Typography>
-									<ArrowUpwardIcon color='error' />
+									<Box textAlign='center' color={indigo.A100}>
+										<Typography itemType='h5'>
+											{post.num_comments}
+										</Typography>
+										<ChatBubbleOutlineOutlinedIcon />
+									</Box>
+								</Grid>
+								<Grid item xs='auto'>
+									<Box textAlign='center'>
+										<Typography itemType='h5' color='error'>
+											{post.ups}
+										</Typography>
+										<ArrowUpwardIcon color='error' />
+									</Box>
 								</Grid>
 							</Grid>
 						))}
