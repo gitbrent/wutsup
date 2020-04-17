@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles'
-import { Button, Icon, Select, MenuItem, FormControl, InputLabel, Grid, Paper, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box } from '@material-ui/core'
+import { Select, MenuItem, FormControl, InputLabel, Grid, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box } from '@material-ui/core'
 import indigo from '@material-ui/core/colors/indigo'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
 //import CalendarTodayIcon from '@material-ui/icons/CalendarToday'
@@ -15,18 +15,26 @@ const theme = createMuiTheme({
 	},
 })
 
-enum redditSub {
+enum RedditSub {
 	askreddit = 'askreddit',
 	memes = 'memes',
 	politics = 'politics',
 }
-enum sortType {
+enum SortType {
 	controversial = 'controversial',
 	hot = 'hot',
 	new = 'new',
 	rising = 'rising',
 	top = 'top',
 }
+enum DelayTime {
+	sec05 = '5',
+	sec10 = '10',
+	sec15 = '15',
+	sec30 = '30',
+	sec60 = '60',
+}
+
 interface post {
 	subreddit: string // "politics"
 	subreddit_subscribers: number
@@ -82,13 +90,13 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function Reddit() {
 	const classes = useStyles()
 
-	const [delaySecs, setDelaySecs] = useState(30)
-	const [selRedditSub, setSelRedditSub] = useState<redditSub | string>(redditSub.politics)
-	const [selSortType, setSelSortType] = useState<sortType | string>(sortType.top)
+	const [selDelaySecs, setDelaySecs] = useState<DelayTime | string>(DelayTime.sec30)
+	const [selRedditSub, setSelRedditSub] = useState<RedditSub | string>(RedditSub.politics)
+	const [selSortType, setSelSortType] = useState<SortType | string>(SortType.top)
 	const [posts, setPosts] = useState<post[]>([])
 	const [idxToShow, setIdxToShow] = useState(0)
-	const [isActive, setIsActive] = useState(true)
-	const [seconds, setSeconds] = useState(0)
+	//const [isActive, setIsActive] = useState(true)
+	//const [seconds, setSeconds] = useState(0)
 
 	/**
 	 * @desc Display loop
@@ -101,8 +109,8 @@ export default function Reddit() {
 		let interval: any = null
 		if (isActive) {
 			interval = setInterval(() => {
-				setSeconds(seconds => seconds + delaySecs)
-			}, delaySecs * 1000)
+				setSeconds(seconds => seconds + selDelaySecs)
+			}, selDelaySecs * 1000)
 		} else if (!isActive && seconds !== 0) {
 			clearInterval(interval)
 		}
@@ -113,16 +121,13 @@ export default function Reddit() {
 	 * Fetch data on init
 	 */
 	useEffect(() => {
-		fetchSelSub()
+		setIdxToShow(0) // TODO: here to repress compiler warnings until we go back to using delay/refresh
+		//fetchSelSub()
 		//getApiData()
 	}, [])
 
 	useEffect(() => {
-		fetchSelSub()
-	}, [selRedditSub])
-
-	function fetchSelSub() {
-		// FYI: sortType is optional
+		// FYI: sortType is optional - omit it for default results
 		fetch(`https://www.reddit.com/r/${selRedditSub}/${selSortType}.json`)
 			.then(response => response.json())
 			.then(json => {
@@ -132,7 +137,7 @@ export default function Reddit() {
 						subreddit: child.data.subreddit,
 						subreddit_subscribers: child.data.subreddit_subscribers,
 						selftext: child.data.selftext,
-						title: (child.data.title || '').replace(/\&amp\;/gi, '&'),
+						title: (child.data.title || '').replace(/&amp;/gi, '&'),
 						permalink: child.data.permalink,
 						link_flair_text: child.data.link_flair_text,
 						thumbnail: child.data.thumbnail,
@@ -153,25 +158,24 @@ export default function Reddit() {
 
 				setPosts(posts)
 			})
-	}
+	}, [selRedditSub, selSortType])
 
 	/**
 	 * /api/v1/me/karma
 	 * /api/trending_subreddits
 	 */
+	/*
 	function getApiData() {
 		//fetch(`https://www.reddit.com/api/trending_subreddits.json`) // WORKS
 		fetch(`https://www.reddit.com/api/trending_subreddits.json`)
-			/*
-			fetch('https://www.reddit.com/r/askreddit.json', {
-				method: 'GET',
-				headers: {
-					Accept: 'application/json',
-					//Authorization: 'Bearer ' + params['access_token'],
-				},
-				mode: 'no-cors',
-			})
-		*/
+		//fetch('https://www.reddit.com/r/askreddit.json', {
+		//	method: 'GET',
+		//	headers: {
+		//		Accept: 'application/json',
+		//		//Authorization: 'Bearer ' + params['access_token'],
+		//	},
+		//	mode: 'no-cors',
+		//})
 			.catch(err => {
 				throw new Error(err)
 			})
@@ -190,6 +194,7 @@ export default function Reddit() {
 				console.error(err.toString())
 			})
 	}
+	*/
 
 	return (
 		<Card>
@@ -208,41 +213,56 @@ export default function Reddit() {
 				subheader='September 10, 2021'
 			/>
 			<CardContent>
-				<Grid container spacing={2} justify='space-evenly' wrap='nowrap'>
-					<Grid item xs>
-						<FormControl variant='filled' fullWidth={true}>
-							<InputLabel id='demo-simple-select-label'>Selected Subreddit</InputLabel>
-							<Select
-								labelId='demo-simple-select-label'
-								id='demo-simple-select'
-								value={selRedditSub}
-								onChange={event => setSelRedditSub(event.target.value as string)}>
-								{Object.entries(redditSub).map(([key, val], idx) => (
-									<MenuItem key={`menu${idx}`} value={key}>
-										{val}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
+				<Box mb={2} data-desc='filters'>
+					<Grid container spacing={2} justify='space-evenly' wrap='nowrap'>
+						<Grid item xs>
+							<FormControl variant='filled' fullWidth={true}>
+								<InputLabel id='filter-subreddit-label'>Subreddit</InputLabel>
+								<Select
+									labelId='filter-subreddit-label'
+									id='filter-subreddit'
+									value={selRedditSub}
+									onChange={event => setSelRedditSub(event.target.value as string)}>
+									{Object.entries(RedditSub).map(([key, val], idx) => (
+										<MenuItem key={`sub${idx}`} value={key}>
+											{val}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</Grid>
+						<Grid item xs={3}>
+							<FormControl variant='filled' fullWidth={true}>
+								<InputLabel id='filter-sorttype-label'>Sort By</InputLabel>
+								<Select
+									labelId='filter-sorttype-label'
+									id='filter-sorttype'
+									value={selSortType}
+									onChange={event => setSelSortType(event.target.value as string)}>
+									{Object.keys(SortType).map((key, idx) => (
+										<MenuItem key={`typ${idx}`} value={key}>
+											{key}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</Grid>
+						<Grid item xs={2}>
+							<FormControl variant='filled' fullWidth={true}>
+								<InputLabel id='filter-delay-label'>Refresh Delay</InputLabel>
+								<Select labelId='filter-delay-label' id='filter-delay' value={selDelaySecs} onChange={event => setDelaySecs(event.target.value as string)}>
+									{Object.values(DelayTime).map((val, idx) => (
+										<MenuItem key={`del${idx}`} value={val}>
+											{val} secs
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</Grid>
 					</Grid>
-					<Grid item xs={3}>
-						<FormControl variant='filled' fullWidth={true}>
-							<InputLabel id='demo-simple-select-filled-label'>Refresh Delay</InputLabel>
-							<Select
-								labelId='demo-simple-select-filled-label'
-								id='demo-simple-select-filled'
-								value={delaySecs}
-								onChange={event => setDelaySecs(Number(event.target.value))}>
-								<MenuItem value={5}>5 sec</MenuItem>
-								<MenuItem value={10}>10 sec</MenuItem>
-								<MenuItem value={30}>30 sec</MenuItem>
-								<MenuItem value={60}>60 sec</MenuItem>
-							</Select>
-						</FormControl>
-					</Grid>
-				</Grid>
+				</Box>
 
-				<section className='mb-0' data-desc='picture posts'>
+				<Box mb={0} data-desc='picture posts'>
 					{posts
 						.filter((_post, idx) => idx >= idxToShow)
 						.filter(post => post.thumbnail && post.url && post.url.toLowerCase().endsWith('jpg'))
@@ -253,21 +273,23 @@ export default function Reddit() {
 								</div>
 							</div>
 						))}
-				</section>
+				</Box>
 
-				<section className='mb-0' data-desc='regular posts'>
+				<Box mb={0} data-desc='regular posts'>
 					{posts
 						.filter((_post, idx) => idx >= idxToShow)
 						.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
 						.map((post, idx) => (
 							<Grid key={idx} container spacing={2}>
-								{post.thumbnail && post.thumbnail !== 'default' && post.thumbnail !== 'self' && (
-									<Grid item xs='auto'>
-										<Box textAlign='center' style={{ minWidth: '130px' }}>
+								<Grid item xs='auto'>
+									<Box textAlign='center' style={{ minWidth: '130px' }}>
+										{post.thumbnail && post.thumbnail !== 'default' && post.thumbnail !== 'self' ? (
 											<img src={post.thumbnail} alt='thumbnail' style={{ maxWidth: '100px', maxHeight: '60px' }} />
-										</Box>
-									</Grid>
-								)}
+										) : (
+											<div style={{ width: '100px', height: '60px' }} />
+										)}
+									</Box>
+								</Grid>
 								<Grid item xs>
 									<Typography itemType='h5' color='textPrimary'>
 										{post.title}
@@ -277,15 +299,13 @@ export default function Reddit() {
 									</Box>
 								</Grid>
 								<Grid item xs='auto'>
-									<Box textAlign='center' color={indigo.A100}>
-										<Typography itemType='h5'>
-											{post.num_comments}
-										</Typography>
+									<Box textAlign='center' fontSize='h6.fontSize' color={indigo.A100} style={{ minWidth: '45px' }}>
+										<Typography>{post.num_comments}</Typography>
 										<ChatBubbleOutlineOutlinedIcon />
 									</Box>
 								</Grid>
 								<Grid item xs='auto'>
-									<Box textAlign='center'>
+									<Box textAlign='center' style={{ minWidth: '45px' }}>
 										<Typography itemType='h5' color='error'>
 											{post.ups}
 										</Typography>
@@ -294,7 +314,7 @@ export default function Reddit() {
 								</Grid>
 							</Grid>
 						))}
-				</section>
+				</Box>
 			</CardContent>
 		</Card>
 	)
