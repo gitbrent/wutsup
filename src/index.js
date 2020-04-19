@@ -11,10 +11,18 @@ const darkTheme = createMuiTheme({
 		type: 'dark',
 		background: {
 			default: '#010101',
+			paper: '#010101',
 		},
-		color: '#90caf9',
+		primary: {
+			main: '#010101',
+		},
+		text: {
+			primary: '#90caf9', // WORKS!
+		},
 	},
 })
+
+console.log(darkTheme)
 
 ReactDOM.render(
 	<React.StrictMode>
