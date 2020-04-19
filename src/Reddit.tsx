@@ -210,7 +210,7 @@ export default function Reddit() {
 					</IconButton>
 				}
 				title='REDDIT'
-				subheader='September 10, 2021'
+				subheader={new Date().toLocaleString()}
 			/>
 			<CardContent>
 				<Box mb={2} data-desc='filters'>
