@@ -4,20 +4,24 @@ import ReactDOM from 'react-dom'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
 
 const darkTheme = createMuiTheme({
 	palette: {
 		type: 'dark',
+		background: {
+			default: '#010101',
+		},
+		color: '#90caf9',
 	},
 })
 
 ReactDOM.render(
 	<React.StrictMode>
-		<ThemeProvider theme={darkTheme}>
+		<MuiThemeProvider theme={darkTheme}>
 			<CssBaseline />
 			<App />
-		</ThemeProvider>
+		</MuiThemeProvider>
 	</React.StrictMode>,
 	document.getElementById('root')
 )
