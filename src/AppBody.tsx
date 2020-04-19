@@ -3,6 +3,7 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import { AppBar, Toolbar, Typography, Paper, Grid, IconButton, Button } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu'
 import Reddit from './Reddit'
+import Testbed from './Testbed'
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -37,10 +38,10 @@ export default function AppBody() {
 			<main>
 				<Grid container spacing={3}>
 					<Grid item xs={12} md={6}>
-						<section>{Reddit()}</section>
+						<Reddit/>
 					</Grid>
 					<Grid item xs={12} md={6}>
-						<Paper>TWITTER</Paper>
+						<Testbed/>
 					</Grid>
 				</Grid>
 			</main>
