@@ -1,121 +1,23 @@
 import React, { useState, useEffect } from 'react'
-import { makeStyles, createStyles, Theme } from '@material-ui/core/styles'
+import { theme, useStyles, useStylesGridFilter } from './Reddit.styles'
+import { DelayTime, RedditSub, SortType, Post, SubJson } from './Reddit.types'
 import { Select, MenuItem, FormControl, InputLabel, Grid, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box } from '@material-ui/core'
 import indigo from '@material-ui/core/colors/indigo'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
-//import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos'
-import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 //import CalendarTodayIcon from '@material-ui/icons/CalendarToday'
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined'
 import MoreVertIcon from '@material-ui/icons/MoreVert'
-import { createMuiTheme } from '@material-ui/core/styles'
-const theme = createMuiTheme({
-	palette: {
-		type: 'dark',
-	},
-})
-
-enum RedditSub {
-	askreddit = 'askreddit',
-	memes = 'memes',
-	politics = 'politics',
-}
-enum SortType {
-	controversial = 'controversial',
-	hot = 'hot',
-	new = 'new',
-	rising = 'rising',
-	top = 'top',
-}
-enum DelayTime {
-	sec05 = '5',
-	sec10 = '10',
-	sec15 = '15',
-	sec30 = '30',
-	sec60 = '60',
-}
-
-interface post {
-	subreddit: string // "politics"
-	subreddit_subscribers: number
-	title: string // "Discussion Thread: White House Coronavirus Task Force Briefing"
-	selftext: string // "brief reporters at the White House on the latest developments and the administration’s response"
-	permalink: string // "/r/politics/comments/fw07am/rudy_giuliani_attempts_to_position_himself_as/"
-	link_flair_text: string // "serious replies only"
-	thumbnail: string // "https://a.thumbs.redditmedia.com/nf-fkqLeJ53JAM94pCl7ZzklRzSU8eYoRoE4XYKbkG8.jpg"
-	url: string // "https://www.businessinsider.com/rudy-giuliani-makes-coronavirus-pivot-as-trumps-new-science-adviser-2020-4"
-	num_comments: number
-	ups: number
-	downs: number
-	over_18: boolean
-	score: number
-	pinned: boolean
-	author: string // "BobJones"
-	created: number
-	created_utc: number
-	dateCreated: Date
-	preview?: {
-		images: [
-			{
-				source: { url: string; width: number; height: number }
-				resolutions: { url: string; width: number; height: number }[]
-			}
-		]
-	}
-}
-interface subJson {
-	kind: string
-	data: post
-}
-
-const useStylesTop = makeStyles((theme: Theme) =>
-	createStyles({
-		root: {
-			background: '#000000',
-			border: '1px solid rgba(144, 202, 249, 0.5)',
-			borderRadius: 4,
-			color: theme.palette.text.primary,
-			marginTop: theme.spacing(1),
-			marginBottom: theme.spacing(1),
-			padding: theme.spacing(3),
-		},
-		container: {
-			//background: '#FF0000 !important', // WORKS
-		},
-		item: {
-			margin: 'auto',
-		},
-	})
-)
-const useStyles = makeStyles((theme: Theme) =>
-	createStyles({
-		root: {
-			flexGrow: 1,
-		},
-		paper: {
-			padding: theme.spacing(2),
-			textAlign: 'center',
-			color: theme.palette.text.secondary,
-		},
-		expandOpen: {
-			transform: 'rotate(180deg)',
-		},
-		avatar: {
-			backgroundColor: '#fc0000',
-		},
-	})
-)
 
 export default function Reddit() {
-	const classesTop = useStylesTop()
+	const classesGridFilter = useStylesGridFilter()
 	const classes = useStyles()
 
 	const [selDelaySecs, setDelaySecs] = useState<DelayTime | string>(DelayTime.sec30)
 	const [selRedditSub, setSelRedditSub] = useState<RedditSub | string>(RedditSub.politics)
 	const [selSortType, setSelSortType] = useState<SortType | string>(SortType.top)
-	const [posts, setPosts] = useState<post[]>([])
+	const [posts, setPosts] = useState<Post[]>([])
 	const [idxToShow, setIdxToShow] = useState(0)
 	//const [isActive, setIsActive] = useState(true)
 	//const [seconds, setSeconds] = useState(0)
@@ -153,8 +55,8 @@ export default function Reddit() {
 		fetch(`https://www.reddit.com/r/${selRedditSub}/${selSortType}.json`)
 			.then(response => response.json())
 			.then(json => {
-				let posts: post[] = []
-				json.data.children.forEach((child: subJson) => {
+				let posts: Post[] = []
+				json.data.children.forEach((child: SubJson) => {
 					posts.push({
 						subreddit: child.data.subreddit,
 						subreddit_subscribers: child.data.subreddit_subscribers,
@@ -218,59 +120,10 @@ export default function Reddit() {
 	}
 	*/
 
-	function renderFilters(): JSX.Element {
+	function renderFilterGrid(): JSX.Element {
 		return (
-			<Box data-desc='filters'>
-				<Grid container spacing={2} justify='space-evenly' wrap='nowrap'>
-					<Grid item xs>
-						<FormControl variant='filled' fullWidth={true}>
-							<InputLabel id='filter-subreddit-label'>Subreddit</InputLabel>
-							<Select
-								labelId='filter-subreddit-label'
-								id='filter-subreddit'
-								value={selRedditSub}
-								onChange={event => setSelRedditSub(event.target.value as string)}>
-								{Object.entries(RedditSub).map(([key, val], idx) => (
-									<MenuItem key={`sub${idx}`} value={key}>
-										{val}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-					</Grid>
-					<Grid item xs={3}>
-						<FormControl variant='filled' fullWidth={true}>
-							<InputLabel id='filter-sorttype-label'>Sort By</InputLabel>
-							<Select labelId='filter-sorttype-label' id='filter-sorttype' value={selSortType} onChange={event => setSelSortType(event.target.value as string)}>
-								{Object.keys(SortType).map((key, idx) => (
-									<MenuItem key={`typ${idx}`} value={key}>
-										{key}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-					</Grid>
-					<Grid item xs={2}>
-						<FormControl variant='filled' fullWidth={true}>
-							<InputLabel id='filter-delay-label'>Refresh Delay</InputLabel>
-							<Select labelId='filter-delay-label' id='filter-delay' value={selDelaySecs} onChange={event => setDelaySecs(event.target.value as string)}>
-								{Object.values(DelayTime).map((val, idx) => (
-									<MenuItem key={`del${idx}`} value={val}>
-										{val} secs
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-					</Grid>
-				</Grid>
-			</Box>
-		)
-	}
-
-	return (
-		<>
-			<Grid container classes={classesTop}>
-				<Grid item xs={'auto'} style={{ fontSize: '3rem', paddingLeft:'2rem', paddingRight:'2rem' }}>
+			<Grid container classes={classesGridFilter}>
+				<Grid item xs={'auto'} style={{ fontSize: '3rem', paddingLeft: '2rem', paddingRight: '2rem' }}>
 					<Box mr={-4} my={'auto'} component='span'>
 						<ChevronRightIcon fontSize='inherit' />
 					</Box>
@@ -281,10 +134,57 @@ export default function Reddit() {
 						<ChevronRightIcon fontSize='inherit' />
 					</Box>
 				</Grid>
-				<Grid item xs>
-					{renderFilters()}
+				<Grid item xs data-desc='filters'>
+					<Box>
+						<Grid container spacing={2} justify='space-evenly' wrap='nowrap'>
+							<Grid item xs>
+								<FormControl variant='filled' fullWidth={true}>
+									<InputLabel id='filter-subreddit-label'>Subreddit</InputLabel>
+									<Select
+										labelId='filter-subreddit-label'
+										id='filter-subreddit'
+										value={selRedditSub}
+										onChange={event => setSelRedditSub(event.target.value as string)}>
+										{Object.entries(RedditSub).map(([key, val], idx) => (
+											<MenuItem key={`sub${idx}`} value={key}>
+												{val}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+							<Grid item xs={3}>
+								<FormControl variant='filled' fullWidth={true}>
+									<InputLabel id='filter-sorttype-label'>Sort By</InputLabel>
+									<Select
+										labelId='filter-sorttype-label'
+										id='filter-sorttype'
+										value={selSortType}
+										onChange={event => setSelSortType(event.target.value as string)}>
+										{Object.keys(SortType).map((key, idx) => (
+											<MenuItem key={`typ${idx}`} value={key}>
+												{key}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+							<Grid item xs={2}>
+								<FormControl variant='filled' fullWidth={true}>
+									<InputLabel id='filter-delay-label'>Refresh Delay</InputLabel>
+									<Select labelId='filter-delay-label' id='filter-delay' value={selDelaySecs} onChange={event => setDelaySecs(event.target.value as string)}>
+										{Object.values(DelayTime).map((val, idx) => (
+											<MenuItem key={`del${idx}`} value={val}>
+												{val} secs
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+						</Grid>
+					</Box>
 				</Grid>
-				<Grid item xs={'auto'} style={{ fontSize: '3rem', paddingLeft:'2rem', paddingRight:'2rem', textAlign:'right' }}>
+				<Grid item xs={'auto'} style={{ fontSize: '3rem', paddingLeft: '2rem', paddingRight: '2rem', textAlign: 'right' }}>
 					<Box component='span'>
 						<ChevronLeftIcon fontSize='inherit' />
 					</Box>
@@ -296,6 +196,11 @@ export default function Reddit() {
 					</Box>
 				</Grid>
 			</Grid>
+		)
+	}
+
+	function renderFullList(): JSX.Element {
+		return (
 			<Grid container>
 				<Grid item xs={12}>
 					<Card>
@@ -371,6 +276,24 @@ export default function Reddit() {
 							</Box>
 						</CardContent>
 					</Card>
+				</Grid>
+			</Grid>
+		)
+	}
+
+	function renderLeftCol(): JSX.Element {
+		return <div />
+	}
+
+	return (
+		<>
+			{renderFilterGrid()}
+			<Grid container>
+				<Grid item xs={2}>
+					{renderLeftCol()}
+				</Grid>
+				<Grid item xs={10}>
+					{renderFullList()}
 				</Grid>
 			</Grid>
 		</>

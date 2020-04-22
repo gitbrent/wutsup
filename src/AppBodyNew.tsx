@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { Box, Grow, Grid } from '@material-ui/core'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
-import Reddit from './RedditNew'
+import Reddit from './views/reddit/RedditNew'
+import Weather from './views/Weather'
 
 import { makeStyles } from '@material-ui/core/styles'
 const useStylesGrp = makeStyles(theme => ({
@@ -22,9 +23,9 @@ const useStylesBtn = makeStyles(_theme => ({
 		flex: '1',
 		//margin: theme.spacing(0), // just testing 'theme'
 		padding: '5px 15px',
-		"&:hover":{
+		'&:hover': {
 			border: '1px solid rgba(144, 202, 249, 0.75) !important',
-		}
+		},
 	},
 	selected: {
 		backgroundColor: 'rgba(144, 202, 249, 0.25) !important',
@@ -95,7 +96,7 @@ export default function Testbed() {
 					{viewSelected === MainView.reddit && <Reddit />}
 					{viewSelected === MainView.newsWorld && renderBoxesWithGrow()}
 					{viewSelected === MainView.twitter && <div>(need a developer key)</div>}
-					{viewSelected === MainView.weather && <div>(need a weather source)</div>}
+					{viewSelected === MainView.weather && <Weather />}
 				</Box>
 			</main>
 		</>
