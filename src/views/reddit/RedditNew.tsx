@@ -250,7 +250,7 @@ export default function Reddit() {
 												</Box>
 											</Grid>
 											<Grid item xs>
-												<Typography itemType='h5' color='textPrimary'>
+												<Typography itemType='h5' color='textSecondary'>
 													{post.title}
 												</Typography>
 												<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
@@ -264,10 +264,8 @@ export default function Reddit() {
 												</Box>
 											</Grid>
 											<Grid item xs='auto'>
-												<Box textAlign='center' style={{ minWidth: '45px' }}>
-													<Typography itemType='h5' color='error'>
-														{post.ups}
-													</Typography>
+												<Box textAlign='center' fontSize='h6.fontSize' color={theme.palette.error.main} style={{ minWidth: '45px' }}>
+													<Typography>{post.ups}</Typography>
 													<ArrowUpwardIcon color='error' />
 												</Box>
 											</Grid>

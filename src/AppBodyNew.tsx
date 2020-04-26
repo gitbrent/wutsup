@@ -31,7 +31,6 @@ const useStylesBtn = makeStyles(_theme => ({
 		backgroundColor: 'rgba(144, 202, 249, 0.25) !important',
 	},
 }))
-//import indigo from '@material-ui/core/colors/indigo'
 
 enum MainView {
 	reddit = 'reddit',
@@ -41,7 +40,7 @@ enum MainView {
 	weather = 'weather',
 }
 
-export default function Testbed() {
+export default function AppBodyNew() {
 	const classesGrp = useStylesGrp()
 	const classesBtn = useStylesBtn()
 

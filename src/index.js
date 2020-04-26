@@ -18,6 +18,7 @@ const darkTheme = createMuiTheme({
 		},
 		text: {
 			primary: '#90caf9', // WORKS!
+			secondary: '#ffffff' // WORKS!
 		},
 	},
 })
