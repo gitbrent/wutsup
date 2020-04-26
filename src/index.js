@@ -22,8 +22,7 @@ const darkTheme = createMuiTheme({
 		},
 	},
 })
-
-console.log(darkTheme)
+//console.log(darkTheme)
 
 ReactDOM.render(
 	<React.StrictMode>

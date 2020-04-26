@@ -31,6 +31,7 @@ export interface Post {
 	link_flair_text: string // "serious replies only"
 	thumbnail: string // "https://a.thumbs.redditmedia.com/nf-fkqLeJ53JAM94pCl7ZzklRzSU8eYoRoE4XYKbkG8.jpg"
 	url: string // "https://www.businessinsider.com/rudy-giuliani-makes-coronavirus-pivot-as-trumps-new-science-adviser-2020-4"
+	id: string // ID36 article ID // "g7thtw"
 	num_comments: number
 	ups: number
 	downs: number
