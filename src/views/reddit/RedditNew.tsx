@@ -18,6 +18,7 @@ export default function Reddit() {
 	const [selRedditSub, setSelRedditSub] = useState<RedditSub | string>(RedditSub.politics)
 	const [selSortType, setSelSortType] = useState<SortType | string>(SortType.top)
 	const [posts, setPosts] = useState<Post[]>([])
+	const [currPost, setCurrPost] = useState<Post>()
 	const [idxToShow, setIdxToShow] = useState(0)
 	//const [isActive, setIsActive] = useState(true)
 	//const [seconds, setSeconds] = useState(0)
@@ -66,6 +67,7 @@ export default function Reddit() {
 						link_flair_text: child.data.link_flair_text,
 						thumbnail: child.data.thumbnail,
 						url: child.data.url,
+						id: child.data.id,
 						num_comments: child.data.num_comments,
 						ups: child.data.ups,
 						downs: child.data.downs,
@@ -79,10 +81,25 @@ export default function Reddit() {
 						author: child.data.author,
 					})
 				})
-
 				setPosts(posts)
 			})
 	}, [selRedditSub, selSortType])
+
+	useEffect(() => {
+		if (posts && posts.length > 0 && posts[0] && posts[0].id)
+			fetch(`https://www.reddit.com/r/${selRedditSub}/comments/${posts[0].id}.json`)
+				//fetch(`https://www.reddit.com/r/politics/comments/g7thtw.json`)
+				.then(response => response.json())
+				.then(json => {
+					//let comments: Comment[] = []
+					json[1].data.children.forEach((child: any) => {
+						//posts.push({
+						console.log(child)
+					})
+					//console.log(json)
+					//setCurrPost(posts[0])
+				})
+	}, [posts])
 
 	/**
 	 * /api/v1/me/karma
@@ -199,11 +216,73 @@ export default function Reddit() {
 		)
 	}
 
+	function renderLeftCol(): JSX.Element {
+		return (
+			<>
+				{posts
+					.filter((_post, idx) => idx >= idxToShow)
+					.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
+					.map((post, idx) => (
+						<Box key={`title${idx}`} bgcolor='background.primary' mb={2}>
+							{post.title}
+							<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
+								{post.dateCreated.toLocaleString()}
+							</Box>
+						</Box>
+					))}
+			</>
+		)
+	}
+
+	function renderCurrPost(): JSX.Element {
+		return (
+			<Box p={3}>
+				{posts
+					//.filter((_post, idx) => idx >= idxToShow)
+					.filter((_post, idx) => idx <= 0)
+					.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
+					.map((post, idx) => (
+						<Grid key={idx} container spacing={2}>
+							<Grid item xs='auto'>
+								<Box textAlign='center' style={{ minWidth: '130px' }}>
+									{post.thumbnail && post.thumbnail !== 'default' && post.thumbnail !== 'self' ? (
+										<img src={post.thumbnail} alt='thumbnail' style={{ maxWidth: '100px', maxHeight: '60px' }} />
+									) : (
+										<div style={{ width: '100px', height: '60px' }} />
+									)}
+								</Box>
+							</Grid>
+							<Grid item xs>
+								<Typography itemType='h5' color='textSecondary'>
+									{post.title}
+								</Typography>
+								<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
+									{post.dateCreated.toLocaleString()}
+								</Box>
+							</Grid>
+							<Grid item xs='auto'>
+								<Box textAlign='center' fontSize='h6.fontSize' color={indigo.A100} style={{ minWidth: '45px' }}>
+									<Typography>{post.num_comments}</Typography>
+									<ChatBubbleOutlineOutlinedIcon />
+								</Box>
+							</Grid>
+							<Grid item xs='auto'>
+								<Box textAlign='center' fontSize='h6.fontSize' color={theme.palette.error.main} style={{ minWidth: '45px' }}>
+									<Typography>{post.ups}</Typography>
+									<ArrowUpwardIcon color='error' />
+								</Box>
+							</Grid>
+						</Grid>
+					))}
+			</Box>
+		)
+	}
+
 	function renderFullList(): JSX.Element {
 		return (
 			<Grid container>
 				<Grid item xs={12}>
-					<Card>
+					<Card style={{ backgroundColor: 'inherit' }}>
 						<CardHeader
 							avatar={
 								<Avatar aria-label='recipe' className={classes.avatar}>
@@ -219,8 +298,6 @@ export default function Reddit() {
 							subheader={new Date().toLocaleString()}
 						/>
 						<CardContent>
-							{/*renderFilters()*/}
-
 							<Box mb={0} data-desc='picture posts'>
 								{posts
 									.filter((_post, idx) => idx >= idxToShow)
@@ -236,7 +313,8 @@ export default function Reddit() {
 
 							<Box mb={0} data-desc='regular posts'>
 								{posts
-									.filter((_post, idx) => idx >= idxToShow)
+									//.filter((_post, idx) => idx >= idxToShow)
+									.filter((_post, idx) => idx <= 0)
 									.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
 									.map((post, idx) => (
 										<Grid key={idx} container spacing={2}>
@@ -279,19 +357,15 @@ export default function Reddit() {
 		)
 	}
 
-	function renderLeftCol(): JSX.Element {
-		return <div />
-	}
-
 	return (
 		<>
 			{renderFilterGrid()}
-			<Grid container>
-				<Grid item xs={2}>
+			<Grid container style={{ backgroundImage: 'linear-gradient(to right, #1e3a64, #0a1a38, #010101)' }}>
+				<Grid item xs={3}>
 					{renderLeftCol()}
 				</Grid>
-				<Grid item xs={10}>
-					{renderFullList()}
+				<Grid item xs={9}>
+					{renderCurrPost()}
 				</Grid>
 			</Grid>
 		</>
