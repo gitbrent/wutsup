@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react'
 //import { makeStyles, createStyles, Theme } from '@material-ui/core/styles'
-import { Select, MenuItem, FormControl, InputLabel, Grid, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box } from '@material-ui/core'
+import { Select, MenuItem, FormControl, InputLabel, Grid, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box, ButtonGroup, Button } from '@material-ui/core'
+
+enum ForecastCity {
+	'Dallas, TX' = 'Dallas,us',
+	'Honolulu, HI' = 'Honolulu,us',
+	'London, UK' = 'London,uk',
+	'Tokyo, JP' = 'Tokyo,jp',
+}
 
 // https://openweathermap.org/current
 interface Forecast {
@@ -17,9 +24,13 @@ interface Forecast {
 	sys: { type: number; id: number; country: string; sunrise: number; sunset: number }
 }
 
+// 7-day forecast
+// https://openweathermap.org/api/one-call-api#parameter
+// https://api.openweathermap.org/data/2.5/onecall?lat=60.99&lon=30.9&appid={YOUR API KEY}
+
 export default function Weather() {
 	const [cityForecast, setCityForecast] = useState<Forecast>()
-	const [cityLocation, setCityLocation] = useState('Dallas,us') // 'London,uk'
+	const [cityLocation, setCityLocation] = useState<ForecastCity | string>(ForecastCity['Dallas, TX'])
 
 	useEffect(() => {
 		// FYI: sortType is optional - omit it for default results
@@ -54,18 +65,49 @@ export default function Weather() {
 				})
 				setPosts(posts)*/
 			})
-	}, [])
+	}, [cityLocation])
+
+	function renderLeftCityPicker() {
+		return (
+			<ButtonGroup orientation='vertical' style={{ width: '100%' }}>
+				{Object.entries(ForecastCity).map(([key, val], idx) => (
+					<Button key={`city${key}`} onClick={() => setCityLocation(val)}>
+						{key}
+					</Button>
+				))}
+			</ButtonGroup>
+		)
+	}
 
 	return (
 		<>
 			<Grid container>
 				<Grid item xs={2}>
+					{renderLeftCityPicker()}
+				</Grid>
+				<Grid item xs={10} style={{ padding: '1rem' }}>
+					<Grid container spacing={2}>
+						<Grid item xs={6}>
+							<Box borderBottom='1px solid #fff'>
+								<h2 style={{ margin: '0px' }}>{cityForecast && cityForecast.name ? cityForecast.name : '?'}</h2>
+							</Box>
+						</Grid>
+						<Grid item xs={6}>
+							<Box borderBottom='1px solid #fff'>
+								<h2 style={{ margin: '0px' }}>
+									{cityForecast && cityForecast.main && cityForecast.main.temp ? Math.round(cityForecast.main.temp) : '?'}
+									<sup style={{ fontSize: '.8rem' }}>o</sup>F
+								</h2>
+							</Box>
+						</Grid>
+					</Grid>
+
+					<Box my={4} bgcolor='background.secondary'>
+						<div>openweather api json</div>
+						<pre>{cityForecast ? JSON.stringify(cityForecast, null, 4) : '?'}</pre>
+					</Box>
 					<Box mb={3}>icon</Box>
 					<img src={`http://openweathermap.org/img/w/${cityForecast && cityForecast.weather && cityForecast.weather[0].icon}.png`} />
-				</Grid>
-				<Grid item xs={10}>
-					<h2>{cityLocation}</h2>
-					<pre>{cityForecast ? JSON.stringify(cityForecast, null, 4) : '?'}</pre>
 				</Grid>
 			</Grid>
 		</>
