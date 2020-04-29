@@ -14,7 +14,7 @@ const darkTheme = createMuiTheme({
 			paper: '#010101',
 		},
 		primary: {
-			main: '#010101',
+			main: '#90caf9',
 		},
 		text: {
 			primary: '#90caf9', // WORKS!
