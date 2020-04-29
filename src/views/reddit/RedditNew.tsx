@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { theme, useStyles, useStylesGridFilter } from './Reddit.styles'
 import { DelayTime, RedditSub, SortType, Post, SubJson } from './Reddit.types'
-import { Select, MenuItem, FormControl, InputLabel, Grid, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box } from '@material-ui/core'
+import {
+	Avatar,
+	Box,
+	Card,
+	CardContent,
+	CardHeader,
+	CircularProgress,
+	FormControl,
+	Grid,
+	IconButton,
+	InputLabel,
+	LinearProgress,
+	MenuItem,
+	Select,
+	Typography,
+} from '@material-ui/core'
 import indigo from '@material-ui/core/colors/indigo'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
@@ -18,38 +33,37 @@ export default function Reddit() {
 	const [selRedditSub, setSelRedditSub] = useState<RedditSub | string>(RedditSub.politics)
 	const [selSortType, setSelSortType] = useState<SortType | string>(SortType.top)
 	const [posts, setPosts] = useState<Post[]>([])
-	const [currPost, setCurrPost] = useState<Post>()
-	const [idxToShow, setIdxToShow] = useState(0)
-	//const [isActive, setIsActive] = useState(true)
-	//const [seconds, setSeconds] = useState(0)
+	const [seconds, setSeconds] = useState(0)
+	const [completed, setCompleted] = useState(0)
 
 	/**
 	 * @desc Display loop
+	 * Animate progress bar every second
+	 * Pop top post
 	 */
-	/*
 	useEffect(() => {
-		setIdxToShow(idxToShow + 1)
+		let interval: any = null
+		let newSecs = seconds + 1 / 2
+		newSecs = newSecs > 100 ? 100 : newSecs
+
+		if (isNaN(Number(selDelaySecs))) return
+
+		// Pop top post off
+		if (seconds >= Number(selDelaySecs)) {
+			setPosts([...posts.splice(1)])
+			newSecs = 0
+		}
+
+		// progress bar
+		setCompleted(Math.min((newSecs / Number(selDelaySecs)) * 100, 100))
 
 		// Timer below
-		let interval: any = null
-		if (isActive) {
-			interval = setInterval(() => {
-				setSeconds(seconds => seconds + selDelaySecs)
-			}, selDelaySecs * 1000)
-		} else if (!isActive && seconds !== 0) {
-			clearInterval(interval)
-		}
-		return () => clearInterval(interval)
-	}, [isActive, seconds])*/
+		interval = setInterval(() => {
+			setSeconds(newSecs)
+		}, 500)
 
-	/**
-	 * Fetch data on init
-	 */
-	useEffect(() => {
-		setIdxToShow(0) // TODO: here to repress compiler warnings until we go back to using delay/refresh
-		//fetchSelSub()
-		//getApiData()
-	}, [])
+		return () => clearInterval(interval)
+	}, [seconds])
 
 	useEffect(() => {
 		// FYI: sortType is optional - omit it for default results
@@ -189,7 +203,11 @@ export default function Reddit() {
 							<Grid item xs={2}>
 								<FormControl variant='filled' fullWidth={true}>
 									<InputLabel id='filter-delay-label'>Refresh Delay</InputLabel>
-									<Select labelId='filter-delay-label' id='filter-delay' value={selDelaySecs} onChange={event => setDelaySecs(event.target.value as string)}>
+									<Select
+										labelId='filter-delay-label'
+										id='filter-delay'
+										value={selDelaySecs}
+										onChange={event => setDelaySecs(event.target.value as string)}>
 										{Object.values(DelayTime).map((val, idx) => (
 											<MenuItem key={`del${idx}`} value={val}>
 												{val} secs
@@ -199,6 +217,9 @@ export default function Reddit() {
 								</FormControl>
 							</Grid>
 						</Grid>
+					</Box>
+					<Box mt={2}>
+						<LinearProgress variant='determinate' value={completed} color='secondary' style={{ width: '100%' }} />
 					</Box>
 				</Grid>
 				<Grid item xs={'auto'} style={{ fontSize: '3rem', paddingLeft: '2rem', paddingRight: '2rem', textAlign: 'right' }}>
@@ -219,17 +240,20 @@ export default function Reddit() {
 	function renderLeftCol(): JSX.Element {
 		return (
 			<>
-				{posts
-					.filter((_post, idx) => idx >= idxToShow)
-					.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
-					.map((post, idx) => (
-						<Box key={`title${idx}`} bgcolor='background.primary' mb={2}>
-							{post.title}
-							<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
-								{post.dateCreated.toLocaleString()}
+				{!posts || posts.length === 0 ? (
+					<CircularProgress />
+				) : (
+					posts
+						.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
+						.map((post, idx) => (
+							<Box key={`title${idx}`} bgcolor='background.primary' mb={2}>
+								{post.title}
+								<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
+									{post.dateCreated.toLocaleString()}
+								</Box>
 							</Box>
-						</Box>
-					))}
+						))
+				)}
 			</>
 		)
 	}
@@ -300,7 +324,6 @@ export default function Reddit() {
 						<CardContent>
 							<Box mb={0} data-desc='picture posts'>
 								{posts
-									.filter((_post, idx) => idx >= idxToShow)
 									.filter(post => post.thumbnail && post.url && post.url.toLowerCase().endsWith('jpg'))
 									.map((post, idx) => (
 										<div key={idx} className='row'>
@@ -313,7 +336,6 @@ export default function Reddit() {
 
 							<Box mb={0} data-desc='regular posts'>
 								{posts
-									//.filter((_post, idx) => idx >= idxToShow)
 									.filter((_post, idx) => idx <= 0)
 									.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
 									.map((post, idx) => (
