@@ -18,12 +18,13 @@ import {
 	Typography,
 } from '@material-ui/core'
 import indigo from '@material-ui/core/colors/indigo'
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-//import CalendarTodayIcon from '@material-ui/icons/CalendarToday'
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined'
 import MoreVertIcon from '@material-ui/icons/MoreVert'
+import Moment from 'moment'
 
 export default function Reddit() {
 	const classesGridFilter = useStylesGridFilter()
@@ -48,16 +49,16 @@ export default function Reddit() {
 
 		if (isNaN(Number(selDelaySecs))) return
 
-		// Pop top post off
+		// Pop top post off after timer interval
 		if (seconds >= Number(selDelaySecs)) {
 			setPosts([...posts.splice(1)])
 			newSecs = 0
 		}
 
-		// progress bar
+		// progress bar update
 		setCompleted(Math.min((newSecs / Number(selDelaySecs)) * 100, 100))
 
-		// Timer below
+		// timer to retrigger this effect after slight delay
 		interval = setInterval(() => {
 			setSeconds(newSecs)
 		}, 500)
@@ -154,11 +155,11 @@ export default function Reddit() {
 	function renderFilterGrid(): JSX.Element {
 		return (
 			<Grid container classes={classesGridFilter}>
-				<Grid item xs={'auto'} style={{ fontSize: '3rem', paddingLeft: '2rem', paddingRight: '2rem' }}>
-					<Box mr={-4} my={'auto'} component='span'>
+				<Grid item xs={'auto'} style={{ fontSize: '4rem', paddingLeft: '0rem', paddingRight: '2rem' }}>
+					<Box mr={-6} my={'auto'} component='span'>
 						<ChevronRightIcon fontSize='inherit' />
 					</Box>
-					<Box mr={-4} component='span'>
+					<Box mr={-6} component='span'>
 						<ChevronRightIcon fontSize='inherit' />
 					</Box>
 					<Box component='span'>
@@ -219,17 +220,17 @@ export default function Reddit() {
 						</Grid>
 					</Box>
 					<Box mt={2}>
-						<LinearProgress variant='determinate' value={completed} color='secondary' style={{ width: '100%' }} />
+						<LinearProgress variant='determinate' value={completed} style={{ width: '100%' }} />
 					</Box>
 				</Grid>
-				<Grid item xs={'auto'} style={{ fontSize: '3rem', paddingLeft: '2rem', paddingRight: '2rem', textAlign: 'right' }}>
+				<Grid item xs={'auto'} style={{ fontSize: '4rem', paddingLeft: '2rem', paddingRight: '0rem', textAlign: 'right' }}>
 					<Box component='span'>
 						<ChevronLeftIcon fontSize='inherit' />
 					</Box>
-					<Box ml={-4} my={'auto'} component='span'>
+					<Box ml={-6} my={'auto'} component='span'>
 						<ChevronLeftIcon fontSize='inherit' />
 					</Box>
-					<Box ml={-4} my={'auto'} component='span'>
+					<Box ml={-6} my={'auto'} component='span'>
 						<ChevronLeftIcon fontSize='inherit' />
 					</Box>
 				</Grid>
@@ -239,22 +240,46 @@ export default function Reddit() {
 
 	function renderLeftCol(): JSX.Element {
 		return (
-			<>
-				{!posts || posts.length === 0 ? (
-					<CircularProgress />
-				) : (
-					posts
-						.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
-						.map((post, idx) => (
-							<Box key={`title${idx}`} bgcolor='background.primary' mb={2}>
-								{post.title}
-								<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
-									{post.dateCreated.toLocaleString()}
-								</Box>
-							</Box>
-						))
-				)}
-			</>
+			<Box p={1}>
+				{posts
+					.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
+					.map((post, idx) => (
+						<Box key={`title${idx}`} mb={1}>
+							<Card className={classes.root} variant='outlined'>
+								<CardContent style={{ paddingBottom: '12px' }}>
+									{/*
+											<Typography variant='h5' component='h2'>
+												{post.dateCreated.toLocaleString()}
+											</Typography>
+											*/}
+									<Typography color='textSecondary' gutterBottom>
+										{post.title}
+									</Typography>
+									<Grid container spacing={1} alignItems='center'>
+										<Grid item xs='auto'>
+											<ArrowUpwardIcon color='error' />
+										</Grid>
+										<Grid item xs>
+											<Typography color='error'>{post.ups}</Typography>
+										</Grid>
+										<Grid item xs='auto'>
+											<ChatBubbleOutlineOutlinedIcon />
+										</Grid>
+										<Grid item xs>
+											{post.num_comments}
+										</Grid>
+										<Grid item xs='auto' style={{ color: '#696969' }}>
+											<AccessTimeIcon />
+										</Grid>
+										<Grid item xs='auto' style={{ color: '#696969' }}>
+											{Moment(post.dateCreated).fromNow()}
+										</Grid>
+									</Grid>
+								</CardContent>
+							</Card>
+						</Box>
+					))}
+			</Box>
 		)
 	}
 
@@ -262,8 +287,7 @@ export default function Reddit() {
 		return (
 			<Box p={3}>
 				{posts
-					//.filter((_post, idx) => idx >= idxToShow)
-					.filter((_post, idx) => idx <= 0)
+					.filter((_post, idx) => idx <= 0)// TODO: showing only first during dev/WIP
 					.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
 					.map((post, idx) => (
 						<Grid key={idx} container spacing={2}>
@@ -277,13 +301,23 @@ export default function Reddit() {
 								</Box>
 							</Grid>
 							<Grid item xs>
-								<Typography itemType='h5' color='textSecondary'>
-									{post.title}
+								<Typography itemType='h5' component='h2' color='textSecondary'>
+									<div>{post.title}</div>
 								</Typography>
+								<div>{post.subreddit}</div>
+								<div>{post.selftext}</div>
+								<div>{post.permalink}</div>
+								<div>{post.url}</div>
 								<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
 									{post.dateCreated.toLocaleString()}
 								</Box>
 							</Grid>
+							{/*<Grid item xs='auto'>
+								<Box textAlign='center' fontSize='h6.fontSize' color={indigo.A100} style={{ minWidth: '45px' }}>
+									<Typography>{post.score}</Typography>
+									<Typography>{post.downs}</Typography>
+								</Box>
+							</Grid>*/}
 							<Grid item xs='auto'>
 								<Box textAlign='center' fontSize='h6.fontSize' color={indigo.A100} style={{ minWidth: '45px' }}>
 									<Typography>{post.num_comments}</Typography>
@@ -382,14 +416,20 @@ export default function Reddit() {
 	return (
 		<>
 			{renderFilterGrid()}
-			<Grid container style={{ backgroundImage: 'linear-gradient(to right, #1e3a64, #0a1a38, #010101)' }}>
-				<Grid item xs={3}>
-					{renderLeftCol()}
+			{!posts || posts.length === 0 ? (
+				<Box my={5} textAlign='center'>
+					<CircularProgress size='8rem' />
+				</Box>
+			) : (
+				<Grid container style={{ backgroundImage: 'linear-gradient(to right, #1e3a64, #0a1a38, #010101)' }}>
+					<Grid item xs={3}>
+						{renderLeftCol()}
+					</Grid>
+					<Grid item xs={9}>
+						{renderCurrPost()}
+					</Grid>
 				</Grid>
-				<Grid item xs={9}>
-					{renderCurrPost()}
-				</Grid>
-			</Grid>
+			)}
 		</>
 	)
 }
