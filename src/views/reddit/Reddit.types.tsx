@@ -33,11 +33,12 @@ export interface Post {
 	thumbnail: string // "https://a.thumbs.redditmedia.com/nf-fkqLeJ53JAM94pCl7ZzklRzSU8eYoRoE4XYKbkG8.jpg"
 	url: string // "https://www.businessinsider.com/rudy-giuliani-makes-coronavirus-pivot-as-trumps-new-science-adviser-2020-4"
 	id: string // ID36 article ID // "g7thtw"
+	over_18: boolean
 	num_comments: number
 	ups: number
 	downs: number
-	over_18: boolean
 	score: number
+	//all_awardings: [{giver_coin_reward,icon_url}]
 	pinned: boolean
 	author: string // "BobJones"
 	created: number
