@@ -6,7 +6,7 @@ import Reddit from './views/reddit/RedditNew'
 import Weather from './views/Weather'
 
 import { makeStyles } from '@material-ui/core/styles'
-const useStylesGrp = makeStyles(theme => ({
+const useStylesGrp = makeStyles((theme) => ({
 	root: {
 		backgroundColor: '#000000',
 		color: '#90caf9',
@@ -15,7 +15,7 @@ const useStylesGrp = makeStyles(theme => ({
 		width: '100%',
 	},
 }))
-const useStylesBtn = makeStyles(_theme => ({
+const useStylesBtn = makeStyles((_theme) => ({
 	root: {
 		background: 'black',
 		border: '1px solid rgba(144, 202, 249, 0.5) !important',
@@ -74,7 +74,7 @@ export default function AppBodyNew() {
 
 	return (
 		<>
-			<header>
+			<header className='flex-no-shrink'>
 				<Box p={0} mb={1}>
 					<ToggleButtonGroup
 						classes={classesGrp}
@@ -90,14 +90,10 @@ export default function AppBodyNew() {
 					</ToggleButtonGroup>
 				</Box>
 			</header>
-			<main>
-				<Box p={0}>
-					{viewSelected === MainView.reddit && <Reddit />}
-					{viewSelected === MainView.newsWorld && renderBoxesWithGrow()}
-					{viewSelected === MainView.twitter && <div>(need a developer key)</div>}
-					{viewSelected === MainView.weather && <Weather />}
-				</Box>
-			</main>
+			{viewSelected === MainView.reddit && <Reddit />}
+			{viewSelected === MainView.newsWorld && renderBoxesWithGrow()}
+			{viewSelected === MainView.twitter && <div>(need a developer key)</div>}
+			{viewSelected === MainView.weather && <Weather />}
 		</>
 	)
 }

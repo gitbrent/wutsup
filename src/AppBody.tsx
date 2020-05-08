@@ -24,7 +24,7 @@ export default function AppBody() {
 
 	return (
 		<>
-			<AppBar position='static'>
+			<AppBar position='static' className='flex-no-shrink'>
 				<Toolbar>
 					<IconButton edge='start' className={classes.menuButton} color='inherit' aria-label='menu'>
 						<MenuIcon />
@@ -38,10 +38,10 @@ export default function AppBody() {
 			<main>
 				<Grid container spacing={3}>
 					<Grid item xs={12} md={6}>
-						<Reddit/>
+						<Reddit />
 					</Grid>
 					<Grid item xs={12} md={6}>
-						<Testbed/>
+						<Testbed />
 					</Grid>
 				</Grid>
 			</main>
