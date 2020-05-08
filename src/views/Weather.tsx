@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 //import { makeStyles, createStyles, Theme } from '@material-ui/core/styles'
-import { Select, MenuItem, FormControl, InputLabel, Grid, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box, ButtonGroup, Button } from '@material-ui/core'
+//import { Select, MenuItem, FormControl, InputLabel, Grid, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box, ButtonGroup, Button } from '@material-ui/core'
+import { Grid, Box, ButtonGroup, Button } from '@material-ui/core'
 
 enum ForecastCity {
 	'Dallas, TX' = 'Dallas,us',
@@ -107,7 +108,7 @@ export default function Weather() {
 						<pre>{cityForecast ? JSON.stringify(cityForecast, null, 4) : '?'}</pre>
 					</Box>
 					<Box mb={3}>icon</Box>
-					<img src={`http://openweathermap.org/img/w/${cityForecast && cityForecast.weather && cityForecast.weather[0].icon}.png`} />
+					<img src={`http://openweathermap.org/img/w/${cityForecast && cityForecast.weather && cityForecast.weather[0].icon}.png`} alt='icon' />
 				</Grid>
 			</Grid>
 		</>
