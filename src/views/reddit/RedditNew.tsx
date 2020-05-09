@@ -1,76 +1,33 @@
 import React, { useState, useEffect } from 'react'
+import Moment from 'moment'
 import { theme, useStyles, useStylesGridFilter } from './Reddit.styles'
-import { DelayTime, RedditSub, SortType, Post, SubJson } from './Reddit.types'
-import {
-	Avatar,
-	Box,
-	Card,
-	CardContent,
-	CardHeader,
-	CircularProgress,
-	FormControl,
-	Grid,
-	IconButton,
-	InputLabel,
-	LinearProgress,
-	MenuItem,
-	Select,
-	Typography,
-} from '@material-ui/core'
+import { Comment, DelayTime, RedditSub, SortType, Post, SubJson } from './Reddit.types'
+import { Box, Card, CardContent, CircularProgress, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from '@material-ui/core'
 import indigo from '@material-ui/core/colors/indigo'
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import AccessTimeIcon from '@material-ui/icons/AccessTime'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined'
-import MoreVertIcon from '@material-ui/icons/MoreVert'
-import Moment from 'moment'
+import LinkIcon from '@material-ui/icons/Link'
+import PersonIcon from '@material-ui/icons/Person'
+import Progress from './Progress'
 
 export default function Reddit() {
 	const classesGridFilter = useStylesGridFilter()
 	const classes = useStyles()
 
-	const [selDelaySecs, setDelaySecs] = useState<DelayTime | string>(DelayTime.sec30)
+	const [selDelaySecs, setSelDelaySecs] = useState<DelayTime | string>(DelayTime.sec30)
 	const [selRedditSub, setSelRedditSub] = useState<RedditSub | string>(RedditSub.politics)
 	const [selSortType, setSelSortType] = useState<SortType | string>(SortType.top)
 	const [posts, setPosts] = useState<Post[]>([])
-	const [seconds, setSeconds] = useState(0)
-	const [completed, setCompleted] = useState(0)
-
-	/**
-	 * @desc Display loop
-	 * Animate progress bar every second
-	 * Pop top post
-	 */
-	useEffect(() => {
-		let interval: any = null
-		let newSecs = seconds + 1 / 2
-		newSecs = newSecs > 100 ? 100 : newSecs
-
-		if (isNaN(Number(selDelaySecs))) return
-
-		// Pop top post off after timer interval
-		if (seconds >= Number(selDelaySecs)) {
-			setPosts([...posts.splice(1)])
-			newSecs = 0
-		}
-
-		// progress bar update
-		setCompleted(Math.min((newSecs / Number(selDelaySecs)) * 100, 100))
-
-		// timer to retrigger this effect after slight delay
-		interval = setInterval(() => {
-			setSeconds(newSecs)
-		}, 500)
-
-		return () => clearInterval(interval)
-	}, [seconds])
+	const [comments, setComments] = useState<Comment[]>([])
 
 	useEffect(() => {
 		// FYI: sortType is optional - omit it for default results
 		fetch(`https://www.reddit.com/r/${selRedditSub}/${selSortType}.json`)
-			.then(response => response.json())
-			.then(json => {
+			.then((response) => response.json())
+			.then((json) => {
 				let posts: Post[] = []
 				json.data.children.forEach((child: SubJson) => {
 					posts.push({
@@ -104,17 +61,15 @@ export default function Reddit() {
 		if (posts && posts.length > 0 && posts[0] && posts[0].id)
 			fetch(`https://www.reddit.com/r/${selRedditSub}/comments/${posts[0].id}.json`)
 				//fetch(`https://www.reddit.com/r/politics/comments/g7thtw.json`)
-				.then(response => response.json())
-				.then(json => {
-					//let comments: Comment[] = []
+				.then((response) => response.json())
+				.then((json) => {
+					let comments: Comment[] = []
 					json[1].data.children.forEach((child: any) => {
-						//posts.push({
-						console.log(child)
+						comments.push(child.data)
 					})
-					//console.log(json)
-					//setCurrPost(posts[0])
+					setComments(comments)
 				})
-	}, [posts])
+	}, [posts, selRedditSub])
 
 	/**
 	 * /api/v1/me/karma
@@ -152,6 +107,10 @@ export default function Reddit() {
 	}
 	*/
 
+	function showNextPost() {
+		setPosts([...posts.splice(1)])
+	}
+
 	function renderFilterGrid(): JSX.Element {
 		return (
 			<Grid container classes={classesGridFilter}>
@@ -176,7 +135,7 @@ export default function Reddit() {
 										labelId='filter-subreddit-label'
 										id='filter-subreddit'
 										value={selRedditSub}
-										onChange={event => setSelRedditSub(event.target.value as string)}>
+										onChange={(event) => setSelRedditSub(event.target.value as string)}>
 										{Object.entries(RedditSub).map(([key, val], idx) => (
 											<MenuItem key={`sub${idx}`} value={key}>
 												{val}
@@ -192,7 +151,7 @@ export default function Reddit() {
 										labelId='filter-sorttype-label'
 										id='filter-sorttype'
 										value={selSortType}
-										onChange={event => setSelSortType(event.target.value as string)}>
+										onChange={(event) => setSelSortType(event.target.value as string)}>
 										{Object.keys(SortType).map((key, idx) => (
 											<MenuItem key={`typ${idx}`} value={key}>
 												{key}
@@ -208,7 +167,7 @@ export default function Reddit() {
 										labelId='filter-delay-label'
 										id='filter-delay'
 										value={selDelaySecs}
-										onChange={event => setDelaySecs(event.target.value as string)}>
+										onChange={(event) => setSelDelaySecs(event.target.value as string)}>
 										{Object.values(DelayTime).map((val, idx) => (
 											<MenuItem key={`del${idx}`} value={val}>
 												{val} secs
@@ -220,7 +179,7 @@ export default function Reddit() {
 						</Grid>
 					</Box>
 					<Box mt={2}>
-						<LinearProgress variant='determinate' value={completed} style={{ width: '100%' }} />
+						<Progress delaySecs={selDelaySecs ? Number(selDelaySecs) : 0} callbackTimerDone={showNextPost} />
 					</Box>
 				</Grid>
 				<Grid item xs={'auto'} style={{ fontSize: '4rem', paddingLeft: '2rem', paddingRight: '0rem', textAlign: 'right' }}>
@@ -242,7 +201,7 @@ export default function Reddit() {
 		return (
 			<Box p={1}>
 				{posts
-					.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
+					.filter((post) => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
 					.map((post, idx) => (
 						<Box key={`title${idx}`} mb={1}>
 							<Card className={classes.root} variant='outlined'>
@@ -285,147 +244,138 @@ export default function Reddit() {
 
 	function renderCurrPost(): JSX.Element {
 		return (
-			<Box p={3}>
+			<Box px={4} py={3}>
 				{posts
-					.filter((_post, idx) => idx <= 0)// TODO: showing only first during dev/WIP
-					.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
+					.filter((_post, idx) => idx <= 0) // TODO: showing only first during dev/WIP
+					.filter((post) => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
 					.map((post, idx) => (
-						<Grid key={idx} container spacing={2}>
-							<Grid item xs='auto'>
-								<Box textAlign='center' style={{ minWidth: '130px' }}>
-									{post.thumbnail && post.thumbnail !== 'default' && post.thumbnail !== 'self' ? (
-										<img src={post.thumbnail} alt='thumbnail' style={{ maxWidth: '100px', maxHeight: '60px' }} />
-									) : (
-										<div style={{ width: '100px', height: '60px' }} />
-									)}
-								</Box>
+						<div key={idx}>
+							<Grid container data-desc='title'>
+								<Grid item xs>
+									<Typography variant='h3' color='textSecondary'>
+										{post.title}
+									</Typography>
+								</Grid>
 							</Grid>
-							<Grid item xs>
-								<Typography itemType='h5' component='h2' color='textSecondary'>
-									<div>{post.title}</div>
-								</Typography>
-								<div>{post.subreddit}</div>
-								<div>{post.selftext}</div>
-								<div>{post.permalink}</div>
-								<div>{post.url}</div>
-								<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
-									{post.dateCreated.toLocaleString()}
-								</Box>
-							</Grid>
-							{/*<Grid item xs='auto'>
-								<Box textAlign='center' fontSize='h6.fontSize' color={indigo.A100} style={{ minWidth: '45px' }}>
-									<Typography>{post.score}</Typography>
-									<Typography>{post.downs}</Typography>
-								</Box>
-							</Grid>*/}
-							<Grid item xs='auto'>
-								<Box textAlign='center' fontSize='h6.fontSize' color={indigo.A100} style={{ minWidth: '45px' }}>
-									<Typography>{post.num_comments}</Typography>
-									<ChatBubbleOutlineOutlinedIcon />
-								</Box>
-							</Grid>
-							<Grid item xs='auto'>
-								<Box textAlign='center' fontSize='h6.fontSize' color={theme.palette.error.main} style={{ minWidth: '45px' }}>
-									<Typography>{post.ups}</Typography>
-									<ArrowUpwardIcon color='error' />
-								</Box>
-							</Grid>
-						</Grid>
+
+							<Box mt={3} mb={1} data-desc='thumbnail and link'>
+								<Grid container spacing={2}>
+									<Grid item xs='auto'>
+										{post.thumbnail && post.thumbnail !== 'default' && post.thumbnail !== 'self' ? (
+											<img src={post.thumbnail} alt='thumbnail' style={{ maxWidth: '100px', maxHeight: '60px' }} />
+										) : (
+											<div style={{ width: '100px', height: '60px' }} />
+										)}
+									</Grid>
+									<Grid item xs>
+										{post.url}
+									</Grid>
+								</Grid>
+							</Box>
+
+							<Box color={theme.palette.text.disabled} mb={4} data-desc='subreddit and author'>
+								<Grid container spacing={5} alignItems='center'>
+									<Grid item xs='auto'>
+										<Box color={theme.palette.error.main}>
+											<Grid container spacing={1}>
+												<Grid item xs='auto'>
+													<ArrowUpwardIcon color='error' />
+												</Grid>
+												<Grid item xs='auto'>
+													<Typography>{post.ups}</Typography>
+												</Grid>
+											</Grid>
+										</Box>
+									</Grid>
+									<Grid item xs='auto'>
+										<Box color={indigo.A100}>
+											<Grid container spacing={1}>
+												<Grid item xs='auto'>
+													<ChatBubbleOutlineOutlinedIcon />
+												</Grid>
+												<Grid item xs='auto'>
+													<Typography>{post.num_comments}</Typography>
+												</Grid>
+											</Grid>
+										</Box>
+									</Grid>
+									<Grid item xs='auto'>
+										<Grid container spacing={1}>
+											<Grid item xs='auto'>
+												<LinkIcon />
+											</Grid>
+											<Grid item xs='auto'>
+												<a href={post.permalink} target='_blank' rel='noopener noreferrer' style={{ color: 'white' }}>
+													{post.subreddit}
+												</a>
+											</Grid>
+										</Grid>
+									</Grid>
+									<Grid item xs='auto'>
+										<Grid container spacing={1}>
+											<Grid item xs='auto'>
+												<PersonIcon />
+											</Grid>
+											<Grid item xs='auto'>
+												{post.author}
+											</Grid>
+										</Grid>
+									</Grid>
+									<Grid item xs='auto'>
+										<Grid container spacing={1}>
+											<Grid item xs='auto'>
+												<AccessTimeIcon />
+											</Grid>
+											<Grid item xs='auto'>
+												{post.dateCreated.toLocaleString()} ({Moment(post.dateCreated).fromNow()})
+											</Grid>
+										</Grid>
+									</Grid>
+								</Grid>
+							</Box>
+
+							<Box p={1}>
+								{comments
+									.filter((item) => item.author !== 'AutoModerator')
+									.map((item, idx) => (
+										<Box key={`comm${idx}`} mb={1}>
+											<Card className={classes.root} variant='outlined'>
+												<CardContent style={{ paddingBottom: '12px' }}>
+													{item.body}
+													<Grid container spacing={3}>
+														<Grid item xs='auto'>
+															{item.author}
+														</Grid>
+														<Grid item xs>
+															{item.ups}
+														</Grid>
+													</Grid>
+												</CardContent>
+											</Card>
+										</Box>
+									))}
+							</Box>
+						</div>
 					))}
 			</Box>
 		)
 	}
 
-	function renderFullList(): JSX.Element {
-		return (
-			<Grid container>
-				<Grid item xs={12}>
-					<Card style={{ backgroundColor: 'inherit' }}>
-						<CardHeader
-							avatar={
-								<Avatar aria-label='recipe' className={classes.avatar}>
-									R
-								</Avatar>
-							}
-							action={
-								<IconButton aria-label='settings'>
-									<MoreVertIcon />
-								</IconButton>
-							}
-							title='REDDIT'
-							subheader={new Date().toLocaleString()}
-						/>
-						<CardContent>
-							<Box mb={0} data-desc='picture posts'>
-								{posts
-									.filter(post => post.thumbnail && post.url && post.url.toLowerCase().endsWith('jpg'))
-									.map((post, idx) => (
-										<div key={idx} className='row'>
-											<div className='col'>
-												<img src={post.url} alt='thumbnail' style={{ maxWidth: '600px', maxHeight: '300px' }} />
-											</div>
-										</div>
-									))}
-							</Box>
-
-							<Box mb={0} data-desc='regular posts'>
-								{posts
-									.filter((_post, idx) => idx <= 0)
-									.filter(post => !post.url || !(post.url || '').toLowerCase().endsWith('jpg'))
-									.map((post, idx) => (
-										<Grid key={idx} container spacing={2}>
-											<Grid item xs='auto'>
-												<Box textAlign='center' style={{ minWidth: '130px' }}>
-													{post.thumbnail && post.thumbnail !== 'default' && post.thumbnail !== 'self' ? (
-														<img src={post.thumbnail} alt='thumbnail' style={{ maxWidth: '100px', maxHeight: '60px' }} />
-													) : (
-														<div style={{ width: '100px', height: '60px' }} />
-													)}
-												</Box>
-											</Grid>
-											<Grid item xs>
-												<Typography itemType='h5' color='textSecondary'>
-													{post.title}
-												</Typography>
-												<Box color={theme.palette.text.disabled} fontFamily='Monospace' fontSize={10}>
-													{post.dateCreated.toLocaleString()}
-												</Box>
-											</Grid>
-											<Grid item xs='auto'>
-												<Box textAlign='center' fontSize='h6.fontSize' color={indigo.A100} style={{ minWidth: '45px' }}>
-													<Typography>{post.num_comments}</Typography>
-													<ChatBubbleOutlineOutlinedIcon />
-												</Box>
-											</Grid>
-											<Grid item xs='auto'>
-												<Box textAlign='center' fontSize='h6.fontSize' color={theme.palette.error.main} style={{ minWidth: '45px' }}>
-													<Typography>{post.ups}</Typography>
-													<ArrowUpwardIcon color='error' />
-												</Box>
-											</Grid>
-										</Grid>
-									))}
-							</Box>
-						</CardContent>
-					</Card>
-				</Grid>
-			</Grid>
-		)
-	}
-
 	return (
 		<>
-			{renderFilterGrid()}
+			<div className='flex-no-shrink'>{renderFilterGrid()}</div>
 			{!posts || posts.length === 0 ? (
-				<Box my={5} textAlign='center'>
-					<CircularProgress size='8rem' />
-				</Box>
+				<Grid container className='flex-section'>
+					<Box my={5} textAlign='center'>
+						<CircularProgress size='8rem' />
+					</Box>
+				</Grid>
 			) : (
-				<Grid container style={{ backgroundImage: 'linear-gradient(to right, #1e3a64, #0a1a38, #010101)' }}>
-					<Grid item xs={3}>
+				<Grid container className='flex-section' style={{ backgroundImage: 'linear-gradient(to right, #1e3a64, #0a1a38, #010101)' }}>
+					<Grid item xs={3} className={'flex-col-scroll'}>
 						{renderLeftCol()}
 					</Grid>
-					<Grid item xs={9}>
+					<Grid item xs={9} className={'flex-col-scroll'}>
 						{renderCurrPost()}
 					</Grid>
 				</Grid>
