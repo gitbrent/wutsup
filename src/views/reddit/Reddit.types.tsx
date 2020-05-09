@@ -66,6 +66,7 @@ export interface Comment {
 	archived: boolean
 	associated_award: string
 	author: string
+	author_flair_text: string
 	/*
 	author_flair_background_color: string
 	author_flair_css_class: string
@@ -112,7 +113,13 @@ export interface Comment {
 	parent_id: string
 	permalink: string
 	removal_reason: string
-	//replies: {kind: "Listing", data: {…}}
+	replies: { data: { children: { data: Comment }[] } }
+	/*
+	replies: {kind: "Listing",…}
+		data: {modhash: "", dist: null, children: [{kind: "t1",…}, {kind: "t1",…}, {kind: "t1",…}, {kind: "more",…}],…}
+			children: [{kind: "t1",…}, {kind: "t1",…}, {kind: "t1",…}, {kind: "more",…}]
+				data: {kind: "t1",…}
+	*/
 	report_reasons: string
 	saved: boolean
 	score: number

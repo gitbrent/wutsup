@@ -65,6 +65,7 @@ export default function Reddit() {
 				.then((json) => {
 					let comments: Comment[] = []
 					json[1].data.children.forEach((child: any) => {
+						child.data.created = new Date(child.data.created * 1000)
 						comments.push(child.data)
 					})
 					setComments(comments)
@@ -206,11 +207,6 @@ export default function Reddit() {
 						<Box key={`title${idx}`} mb={1}>
 							<Card className={classes.root} variant='outlined'>
 								<CardContent style={{ paddingBottom: '12px' }}>
-									{/*
-											<Typography variant='h5' component='h2'>
-												{post.dateCreated.toLocaleString()}
-											</Typography>
-											*/}
 									<Typography color='textSecondary' gutterBottom>
 										{post.title}
 									</Typography>
@@ -239,6 +235,61 @@ export default function Reddit() {
 						</Box>
 					))}
 			</Box>
+		)
+	}
+
+	function renderReply(item: Comment): JSX.Element {
+		return (
+			<>
+				<Grid container spacing={5} alignItems='center'>
+					<Grid item xs='auto'>
+						<Box color={theme.palette.error.main}>
+							<Grid container spacing={1}>
+								<Grid item xs='auto'>
+									<ArrowUpwardIcon />
+								</Grid>
+								<Grid item xs>
+									<Typography>{item.ups}</Typography>
+								</Grid>
+							</Grid>
+						</Box>
+					</Grid>
+					<Grid item xs='auto'>
+						<Box color={theme.palette.text.secondary}>
+							<Grid container spacing={1}>
+								<Grid item xs='auto'>
+									<Box color={theme.palette.text.secondary}>
+										<PersonIcon />
+									</Box>
+								</Grid>
+								<Grid item xs>
+									<Typography>
+										{item.author} {item.author_flair_text}
+									</Typography>
+								</Grid>
+							</Grid>
+						</Box>
+					</Grid>
+					<Grid item xs>
+						<Box color={theme.palette.text.disabled}>
+							<Grid container spacing={1}>
+								<Grid item xs='auto'>
+									<AccessTimeIcon />
+								</Grid>
+								<Grid item xs='auto'>
+									<Typography>{Moment(item.created).fromNow()}</Typography>
+								</Grid>
+							</Grid>
+						</Box>
+					</Grid>
+				</Grid>
+				<Grid container>
+					<Grid item xs>
+						{/* FIXME:decode first	<div dangerouslySetInnerHTML={{ __html: item.body_html }}></div>*/}
+						{item.body}
+					</Grid>
+				</Grid>
+			</>
 		)
 	}
 
@@ -340,16 +391,16 @@ export default function Reddit() {
 									.map((item, idx) => (
 										<Box key={`comm${idx}`} mb={1}>
 											<Card className={classes.root} variant='outlined'>
-												<CardContent style={{ paddingBottom: '12px' }}>
-													{item.body}
-													<Grid container spacing={3}>
-														<Grid item xs='auto'>
-															{item.author}
-														</Grid>
-														<Grid item xs>
-															{item.ups}
-														</Grid>
-													</Grid>
+												<CardContent>
+													<Box mb={1}>{renderReply(item)}</Box>
+													{item.replies &&
+														item.replies.data &&
+														item.replies.data.children &&
+														item.replies.data.children.map((child) => (
+															<Box borderLeft='1px solid red' pl={2} mb={1}>
+																{renderReply(child.data)}
+															</Box>
+														))}
 												</CardContent>
 											</Card>
 										</Box>
