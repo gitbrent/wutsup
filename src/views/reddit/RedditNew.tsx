@@ -241,7 +241,7 @@ export default function Reddit() {
 	function renderReply(item: Comment): JSX.Element {
 		return (
 			<>
-				<Grid container spacing={5} alignItems='center'>
+				<Grid container spacing={1} alignItems='center'>
 					<Grid item xs='auto'>
 						<Box color={theme.palette.error.main}>
 							<Grid container spacing={1}>
@@ -324,7 +324,7 @@ export default function Reddit() {
 								</Grid>
 							</Box>
 
-							<Box color={theme.palette.text.disabled} mb={4} data-desc='subreddit and author'>
+							<Box color={theme.palette.text.disabled} mb={3} data-desc='subreddit and author'>
 								<Grid container spacing={5} alignItems='center'>
 									<Grid item xs='auto'>
 										<Box color={theme.palette.error.main}>
@@ -385,19 +385,21 @@ export default function Reddit() {
 								</Grid>
 							</Box>
 
-							<Box p={1}>
+							<Box>
 								{comments
 									.filter((item) => item.author !== 'AutoModerator')
 									.map((item, idx) => (
-										<Box key={`comm${idx}`} mb={1}>
+										<Box key={`comm${idx}`} mb={2}>
 											<Card className={classes.root} variant='outlined'>
 												<CardContent>
-													<Box mb={1}>{renderReply(item)}</Box>
+													<Box className={classes.borderB} pb={1} mb={2}>
+														{renderReply(item)}
+													</Box>
 													{item.replies &&
 														item.replies.data &&
 														item.replies.data.children &&
-														item.replies.data.children.map((child) => (
-															<Box borderLeft='1px solid red' pl={2} mb={1}>
+														item.replies.data.children.map((child, idy) => (
+															<Box className={idy%2 === 0 ? classes.borderL0 : classes.borderL1} pl={2} mb={1}>
 																{renderReply(child.data)}
 															</Box>
 														))}

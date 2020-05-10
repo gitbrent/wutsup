@@ -43,5 +43,26 @@ export const useStyles = makeStyles((theme: Theme) =>
 		avatar: {
 			backgroundColor: '#fc0000',
 		},
+		borderB: {
+			borderBottom: '1px solid rgba(255,255,255,0.25)',
+		},
+		borderL: {
+			borderLeft: '1px solid rgba(255,0,0,0.75)',
+		},
+		borderL0: {
+			borderLeft: '2px solid darkgreen',
+		},
+		borderL1: {
+			borderLeft: '2px solid darkviolet',
+		},
+		borderL2: {
+			borderLeft: '2px solid darkgoldenrod',
+		},
+		borderL3: {
+			borderLeft: '2px solid amber',
+		},
+		borderL4: {
+			borderLeft: '2px solid teal',
+		},
 	})
 )
