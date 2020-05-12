@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react'
 //import { Select, MenuItem, FormControl, InputLabel, Grid, CardContent, Card, CardHeader, Avatar, IconButton, Typography, Box, ButtonGroup, Button } from '@material-ui/core'
 import { Grid, Box, ButtonGroup, Button } from '@material-ui/core'
 
+// https://www.weather.gov/documentation/services-web-api
+// NWS, Dallas: https://api.weather.gov/points/33.086083,-96.749869
+
 enum ForecastCity {
 	'Dallas, TX' = 'Dallas,us',
 	'Honolulu, HI' = 'Honolulu,us',
