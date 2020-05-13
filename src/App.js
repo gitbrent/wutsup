@@ -1,6 +1,5 @@
 import React from 'react'
-//import AppBody from './AppBody'
-import AppBody from './AppBodyNew'
+import AppBody from './AppBody'
 
 function App() {
 	return <AppBody />
