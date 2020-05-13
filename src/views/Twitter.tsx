@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react'
 /*
 const Twitter = require('twitter');
 const client = new Twitter({
@@ -7,7 +7,11 @@ const client = new Twitter({
   access_token_key: 'xxxxxxx',
   access_token_secret: 'xxxxxxxx',
 })
-
+*/
+export default function Twitter() {
+	return <h5>(need developer key)</h5>
+}
+/*
 class TwitterFeed extends Component {
   componentDidMount() {
     const params = {screen_name: 'nimaiwalsh'};
