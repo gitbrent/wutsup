@@ -38,7 +38,7 @@ export default function Weather() {
 
 	useEffect(() => {
 		// FYI: sortType is optional - omit it for default results
-		fetch(`http://api.openweathermap.org/data/2.5/weather?units=imperial&q=${cityLocation}&APPID=${process.env.REACT_APP_WEATHER_API_KEY}`)
+		fetch(`https://api.openweathermap.org/data/2.5/weather?units=imperial&q=${cityLocation}&APPID=${process.env.REACT_APP_WEATHER_API_KEY}`)
 			.then(response => response.json())
 			.then(json => {
 				setCityForecast(json as Forecast)
@@ -111,7 +111,7 @@ export default function Weather() {
 						<pre>{cityForecast ? JSON.stringify(cityForecast, null, 4) : '?'}</pre>
 					</Box>
 					<Box mb={3}>icon</Box>
-					<img src={`http://openweathermap.org/img/w/${cityForecast && cityForecast.weather && cityForecast.weather[0].icon}.png`} alt='icon' />
+					<img src={`https://openweathermap.org/img/w/${cityForecast && cityForecast.weather && cityForecast.weather[0].icon}.png`} alt='icon' />
 				</Grid>
 			</Grid>
 		</>
