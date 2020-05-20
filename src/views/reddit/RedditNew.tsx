@@ -399,7 +399,7 @@ export default function Reddit() {
 														item.replies.data &&
 														item.replies.data.children &&
 														item.replies.data.children.map((child, idy) => (
-															<Box className={idy%2 === 0 ? classes.borderL0 : classes.borderL1} pl={2} mb={1}>
+															<Box key={`box${idy}`} className={idy%2 === 0 ? classes.borderL0 : classes.borderL1} pl={2} mb={1}>
 																{renderReply(child.data)}
 															</Box>
 														))}
