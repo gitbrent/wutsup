@@ -17,7 +17,7 @@ export default function Reddit() {
 	const classesGridFilter = useStylesGridFilter()
 	const classes = useStyles()
 
-	const [selDelaySecs, setSelDelaySecs] = useState<DelayTime | string>(DelayTime.sec30)
+	const [selDelaySecs, setSelDelaySecs] = useState<DelayTime | string>(DelayTime.secNo)
 	const [selRedditSub, setSelRedditSub] = useState<RedditSub | string>(RedditSub.politics)
 	const [selSortType, setSelSortType] = useState<SortType | string>(SortType.top)
 	const [posts, setPosts] = useState<Post[]>([])
